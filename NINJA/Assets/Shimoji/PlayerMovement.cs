@@ -5,25 +5,32 @@ using UnityEngine;
 public class PlayerMovement : MonoBehaviour
 {
 
-    public CharacterController controller;
+    public float speed = 0.5f;
 
-    public float speed = 12f;
-    public float gravity = -9.81f;
-
-    Vector3 velocity;
-
-    // Update is called once per frame
-    void Update()
+    private void FixedUpdate()
     {
-        float x = Input.GetAxis("Horizontal");
-        float z = Input.GetAxis("Vertical");
+        var pos = transform.position;
+        pos += transform.right * Input.GetAxis("Horizontal") * speed;
+        pos += transform.forward * Input.GetAxis("Vertical") * speed;
+        transform.position = pos;
 
-        Vector3 move = transform.right * x + transform.forward * z;
-
-        controller.Move(move * speed * Time.deltaTime);
-
-        velocity.y += gravity * Time.deltaTime;
-
-        controller.Move(velocity * Time.deltaTime);
     }
+
+    private void OnCollisionEnter(Collision other)
+    {
+        if (other.gameObject.tag == "Bumper") {
+            StartCoroutine("WaitKeyInput");
+        }
+    }
+
+    IEnumerator WaitKeyInput() {
+
+        this.gameObject.GetComponent<PlayerMovement>().enabled = false;
+        {
+            yield return new WaitForSeconds(0.5f);
+        }
+        this.gameObject.GetComponent<PlayerMovement>().enabled = true;
+
+    }
+
 }
